@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="Schedular_dataload_flow" doc:id="4fd1deb7-17c7-40d4-8d9b-59919d17d91c" >
+		<scheduler doc:name="Data load to objectstore schedular" doc:id="ebddd57e-557a-4420-837e-175bc2cadead" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="2" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Start Logger" doc:id="6d2aaec3-de40-4db0-931a-350c1960ed76" message="***Schedular Flow Started *** #[now()]"/>
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="9c5ec716-5dbb-4601-ad7d-529918efd615" millisBetweenRetries="6000">
+			<http:request method="GET" doc:name="Get Blog Details" doc:id="3db8a781-7f7d-43a0-a265-3b191e8308ba" url="https://edit.dwinsoft.in/wp-json/wp/v2/posts?per_page=100" responseTimeout="60000" >
+				<non-repeatable-stream />
+			</http:request>
+		</until-successful>
+		<logger level="DEBUG" doc:name="Payload Logger" doc:id="e5a7288e-a228-4f05-b68b-6349b65a5b0e" message="Retrived paylaod #[payload]"/>
+		<os:store doc:name="Store the Blog Data" doc:id="877df156-cdec-4783-863c-bbe76fb1274f" key="blogData" objectStore="Object_store"/>
+		<logger level="INFO" doc:name="End Logger" doc:id="ec4886ff-4b95-411e-b909-08edd6ce35fd" message="***Schedular Flow Ended *** #[now()]"/>
+	</flow>
+</mule>

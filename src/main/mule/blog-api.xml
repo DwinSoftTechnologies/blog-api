@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+">
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="5e91bd4a-b021-41ea-a19d-8d67608e73f6" persistent="false" config-ref="ObjectStore_Config"/>
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="709805ba-0863-4e21-b2ae-ca3d9cec8bed" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="917cffc7-3ed3-4cde-949f-9f29aafcb12c" >
+		<http:listener-connection host="0.0.0.0" port="9595" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:public-resource />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
+	</http:listener-config>
+	<flow name="main-implFlow" doc:id="28ecbd57-3a5f-48b0-8245-44c7ac525a4c" >
+		<http:listener doc:name="Listener" doc:id="3359293a-fdfd-4d43-b1fe-83da1e093d4f" path="/blog" config-ref="HTTP_Listener_config">
+			<http:response >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Key" : "Value"
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Start Logger" doc:id="71a18133-c790-41e2-b8ed-e609ec2c25a5" message="****Start Logger**"/>
+		<os:retrieve doc:name="Retrieve Blog Data " doc:id="b352e610-dd3e-453d-bd01-695952941144" key="blogData" objectStore="Object_store">
+			<os:default-value ><![CDATA[#[[]]]]></os:default-value>
+		</os:retrieve>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="Set Payload" doc:id="ea91f8dc-e653-4587-995d-3d33204a448c" />
+		<logger level="DEBUG" doc:name="Payload Logger" doc:id="bc1157bf-34ff-4861-989c-fec65deef629" message="Retrive Payload from object store #[paylaod]"/>
+		<logger level="INFO" doc:name="End Logger" doc:id="5ebcdd53-3719-4e3b-b75e-ae8a6d67c4b1" message="****End Logger**"/>
+	</flow>
+</mule>
